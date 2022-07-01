@@ -1,22 +1,21 @@
 const { Schema, Types } = require('mongoose');
 
-const assignmentSchema = new Schema(
+const reactionSchema = new Schema(
   {
-    assignmentId: {
+    reactionId: {
       type: Schema.Types.ObjectId,
       default: () => new Types.ObjectId(),
     },
-    assignmentName: {
+    reactionBodyName: {
       type: String,
       required: true,
       maxlength: 50,
       minlength: 4,
-      default: 'Unnamed assignment',
+      default: 'Unnamed reaction',
     },
-    score: {
-      type: Number,
+    username: {
+      type: String,
       required: true,
-      default: () => Math.floor(Math.random() * (100 - 70 + 1) + 70),
     },
     createdAt: {
       type: Date,
@@ -27,8 +26,36 @@ const assignmentSchema = new Schema(
     toJSON: {
       getters: true,
     },
-    id: false,
   }
 );
 
-module.exports = assignmentSchema;
+const thoughtSchema = new Schema(
+  {
+    thoughtText: {
+      type: String,
+      required: 'You need to leave a thought!',
+      minlength: 1,
+      maxlength: 280
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    username: {
+      type: String,
+      required: true
+    },
+    reactions: [reactionSchema]
+  },
+  {
+    toJSON: {
+      getters: true,
+      virtuals: true
+    },
+  }
+);
+thoughtSchema.virtual('reactionCount').get(function() {
+  return this.reactions.length;
+});
+const Thought = model('Thought', thoughtSchema);
+module.exports = Thought;
